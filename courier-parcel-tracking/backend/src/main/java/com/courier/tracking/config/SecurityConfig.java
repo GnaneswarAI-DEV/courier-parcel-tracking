@@ -1,3 +1,4 @@
+
 package com.courier.tracking.config;
 
 import com.courier.tracking.security.JwtAuthFilter;
@@ -35,28 +36,51 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
+
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .cors(cors ->
+                cors.configurationSource(corsConfigurationSource())
+            )
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                session.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS
+                )
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
+                .requestMatchers(HttpMethod.GET, "/").permitAll()
+                .requestMatchers(
+                    "/api/v1/auth/login",
+                    "/api/v1/auth/register"
+                ).permitAll()
                 .requestMatchers(
                     "/api/v1/parcels/track/**",
                     "/api/v1/parcels/*/history"
                 ).permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/parcels").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/v1/parcels").hasAnyRole("ADMIN", "DRIVER")
-                .requestMatchers("/api/v1/parcels/stats").hasRole("ADMIN")
-                .requestMatchers("/api/v1/parcels/*/status").hasAnyRole("ADMIN", "DRIVER")
-                .requestMatchers("/api/v1/parcels/customer/**").authenticated()
+                .requestMatchers(
+                    HttpMethod.POST, "/api/v1/parcels"
+                ).hasRole("ADMIN")
+                .requestMatchers(
+                    HttpMethod.GET, "/api/v1/parcels"
+                ).hasAnyRole("ADMIN", "DRIVER")
+                .requestMatchers(
+                    "/api/v1/parcels/stats"
+                ).hasRole("ADMIN")
+                .requestMatchers(
+                    "/api/v1/parcels/*/status"
+                ).hasAnyRole("ADMIN", "DRIVER")
+                .requestMatchers(
+                    "/api/v1/parcels/customer/**"
+                ).authenticated()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                jwtAuthFilter,
+                UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
@@ -65,12 +89,18 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(allowedOrigin));
-        config.setAllowedMethods(List.of("GET", "POST", "PATCH", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowedMethods(
+            List.of("GET", "POST", "PATCH", "OPTIONS")
+        );
+        config.setAllowedHeaders(
+            List.of("Authorization", "Content-Type")
+        );
         config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
+
         return source;
     }
 }
