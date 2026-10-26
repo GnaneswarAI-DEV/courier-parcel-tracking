@@ -2,6 +2,7 @@
 package com.courier.tracking.config;
 
 import com.courier.tracking.security.JwtAuthFilter;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,15 +17,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 @Configuration
 public class SecurityConfig {
 
-    @Value("${app.cors.allowed-origin}")
-    private String allowedOrigin;
-
     private final JwtAuthFilter jwtAuthFilter;
+
+    @Value("${app.cors.allowed-origin:https://courierpl.netlify.app}")
+    private String allowedOrigin;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
@@ -51,11 +50,11 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/").permitAll()
                 .requestMatchers(
                     "/api/v1/auth/login",
                     "/api/v1/auth/register"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/").permitAll()
                 .requestMatchers(
                     "/api/v1/parcels/track/**",
                     "/api/v1/parcels/*/history"
@@ -88,6 +87,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+
         config.setAllowedOrigins(List.of(allowedOrigin));
         config.setAllowedMethods(
             List.of("GET", "POST", "PATCH", "OPTIONS")
@@ -99,6 +99,7 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source =
             new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/api/**", config);
 
         return source;
